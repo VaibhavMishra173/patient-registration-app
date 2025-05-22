@@ -17,7 +17,7 @@ const App: React.FC = () => {
     const setup = async () => {
       try {
         await initDatabase();
-        loadPatients();
+        await loadPatients();
       } catch (error) {
         console.error('Failed to initialize database:', error);
       }
@@ -68,6 +68,10 @@ const App: React.FC = () => {
       throw error;
     }
   };
+
+  if (isLoading) {
+    return <div className="text-center mt-20 text-gray-500">Initializing...</div>;
+  }
 
   return (
     <Layout>
