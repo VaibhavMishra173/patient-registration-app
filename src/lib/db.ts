@@ -1,6 +1,7 @@
 import { PGliteWorker } from '@electric-sql/pglite/worker';
 import type { Patient, PatientFormData, QueryResult } from '../types';
 import MyWorker from '../worker/my-pglite-worker?worker';
+import { normalizePatientKeys } from '../utils/normalizePatientKeys';
 
 // Global variables
 let pg: PGliteWorker | null = null;
@@ -133,7 +134,7 @@ export const getAllPatients = async (): Promise<Patient[]> => {
     ORDER BY id DESC
   `);
 
-  return result.rows as Patient[];
+  return result.rows.map(normalizePatientKeys);
 };
 
 // Execute a custom query
