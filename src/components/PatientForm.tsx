@@ -17,7 +17,7 @@ const patientSchema = z.object({
   }, "Invalid date of birth"),
   gender: z.enum(["male", "female", "other"]),
   email: z.string().email("Invalid email address"),
-  phone: z.string().min(7, "Phone number must be at least 7 characters"),
+  phone: z.string().length(10, "Phone number must be exactly 10 digits").regex(/^\d+$/, "Phone number must contain only digits"),
   address: z.string().min(5, "Address must be at least 5 characters")
 });
 
