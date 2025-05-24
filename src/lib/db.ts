@@ -1,24 +1,22 @@
 import { PGliteWorker } from '@electric-sql/pglite/worker';
 import type { Patient, PatientFormData, QueryResult } from '../types';
+import MyWorker from '../worker/my-pglite-worker?worker';
 
+// Global variables
 let pg: PGliteWorker | null = null;
 let dbReady: Promise<void>;
 
 // BroadcastChannel for notifying other tabs
 const bc = new BroadcastChannel('db-updates');
 
-/**
- * Initialize the database connection and schema.
- * Ensures only the leader tab sets up the DB.
- */
+// Initialize the database connection and schema
 export const initDatabase = (): Promise<void> => {
   if (dbReady) return dbReady;
 
   dbReady = new Promise(async (resolve, reject) => {
     try {
       pg = new PGliteWorker(
-        new Worker('./my-pglite-worker.js', { type: 'module' }),
-        // new Worker('../../public/my-pglite-worker.js', { type: 'module' }),
+        new MyWorker(),
         { dataDir: 'idb://patient_registration_db' }
       );
 
@@ -26,7 +24,7 @@ export const initDatabase = (): Promise<void> => {
       const waitForLeader = async () => {
         const timeout = 5000;
         const start = Date.now();
-        while (!(await pg.isLeader)) {
+        while (!pg!.isLeader) {
           if (Date.now() - start > timeout) {
             console.warn('Leader election timed out. Proceeding without leadership.');
             break;
@@ -37,10 +35,10 @@ export const initDatabase = (): Promise<void> => {
 
       await waitForLeader();
 
-      console.log('Is this tab the leader?', await pg.isLeader);
+      console.log('Is this tab the leader?', pg.isLeader);
 
       // Only leader creates schema
-      if (await pg.isLeader) {
+      if (pg.isLeader) {
         await pg.query(`
           CREATE TABLE IF NOT EXISTS patients (
             id SERIAL PRIMARY KEY,
@@ -67,21 +65,17 @@ export const initDatabase = (): Promise<void> => {
   return dbReady;
 };
 
-/**
- * Notify all tabs of a DB update.
- */
+// Notify all tabs of a DB update
 export const dispatchDbUpdatedEvent = (detail: object) => {
   bc.postMessage(detail);
 };
 
-// Optional: Listen to broadcast and re-emit a window event
+// Listen to BroadcastChannel and emit custom window event
 bc.onmessage = (event) => {
   window.dispatchEvent(new CustomEvent('db-updated', { detail: event.data }));
 };
 
-/**
- * Register a new patient.
- */
+// Register a new patient
 export const registerPatient = async (patientData: PatientFormData): Promise<Patient> => {
   await initDatabase();
   if (!pg) throw new Error('Database not initialized');
@@ -106,7 +100,7 @@ export const registerPatient = async (patientData: PatientFormData): Promise<Pat
       ]
     );
 
-    if (!result || !result.rows || !result.rows[0]) {
+    if (!result?.rows?.[0]) {
       throw new Error('Patient insert failed.');
     }
 
@@ -119,9 +113,7 @@ export const registerPatient = async (patientData: PatientFormData): Promise<Pat
   }
 };
 
-/**
- * Get all patients in descending order of ID.
- */
+// Get all patients in descending order
 export const getAllPatients = async (): Promise<Patient[]> => {
   await initDatabase();
   if (!pg) throw new Error('Database not initialized');
@@ -129,14 +121,14 @@ export const getAllPatients = async (): Promise<Patient[]> => {
   const result = await pg.query(`
     SELECT 
       id,
-      firstName AS "firstName",
-      lastName AS "lastName",
-      dateOfBirth AS "dateOfBirth",
+      firstName,
+      lastName,
+      dateOfBirth,
       gender,
       email,
       phone,
       address,
-      createdAt AS "createdAt"
+      createdAt
     FROM patients
     ORDER BY id DESC
   `);
@@ -144,9 +136,7 @@ export const getAllPatients = async (): Promise<Patient[]> => {
   return result.rows as Patient[];
 };
 
-/**
- * Execute a raw SQL query.
- */
+// Execute a custom query
 export const executeQuery = async (
   sqlQuery: string,
   notifyChange = true
