@@ -17,8 +17,8 @@ export const initDatabase = (): Promise<void> => {
   dbReady = new Promise(async (resolve, reject) => {
     try {
       pg = new PGliteWorker(
-        // new Worker('./my-pglite-worker.js', { type: 'module' }),
-        new Worker('../../public/my-pglite-worker.js', { type: 'module' }),
+        new Worker('./my-pglite-worker.js', { type: 'module' }),
+        // new Worker('../../public/my-pglite-worker.js', { type: 'module' }),
         { dataDir: 'idb://patient_registration_db' }
       );
 

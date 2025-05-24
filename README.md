@@ -1,59 +1,132 @@
-# patient-registration-app
+# Patient Registration System
 
+A frontend-only patient registration application built with React, TypeScript, and PgLite for data storage. This application enables users to register patients, query records using SQL, and persist data across page refreshes and browser tabs.
 
+## Features
 
+- ✅ Register new patients with validation
+- ✅ View patient records in a table format
+- ✅ Query patient data using raw SQL
+- ✅ Cross-tab synchronization for real-time updates
+- ✅ Data persistence across page refreshes
+- ✅ Responsive design with Tailwind CSS
 
-# React + TypeScript + Vite
+## Tech Stack
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+- **Frontend Framework**: React with TypeScript
+- **Database**: PgLite (WebAssembly-based SQLite database)
+- **Styling**: Tailwind CSS
+- **Form Validation**: Zod
+- **Notifications**: React Hot Toast
+- **Build Tool**: Vite
 
-Currently, two official plugins are available:
+## Installation
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/VaibhavMishra173/patient-registration-app.git
+   cd patient-registration-app
+   ```
 
-## Expanding the ESLint configuration
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+4. Build for production:
+   ```bash
+   npm run build
+   ```
+
+## Usage
+
+### Patient Registration
+
+1. Navigate to the "Register Patient" tab
+2. Fill in the patient details form with validated fields:
+   - First Name
+   - Last Name
+   - Date of Birth
+   - Gender
+   - Email
+   - Phone
+   - Address
+3. Click "Register Patient" to save the data
+4. View the newly registered patient in the list below
+
+### SQL Query Interface
+
+1. Navigate to the "Query Database" tab
+2. Enter SQL queries in the text area
+3. Click "Execute Query" to run the query
+4. View the results in the table below
+
+### Example Queries
+
+```sql
+-- Get all patients
+SELECT * FROM patients
+
+-- Find patients by last name
+SELECT * FROM patients WHERE lastName LIKE '%Smith%'
+
+-- Count patients by gender
+SELECT gender, COUNT(*) as count FROM patients GROUP BY gender
+
+-- Find patients registered in the last 7 days
+SELECT * FROM patients WHERE createdAt > date('now', '-7 days')
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Deployment
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+This application is deployed at: [https://patient-registration-app.vercel.app](https://patient-registration-app.vercel.app)
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+## Development Challenges
+
+### Challenge 1: Cross-Tab Synchronization
+
+Implementing cross-tab synchronization required careful configuration of PgLite's synchronization options. The solution involved:
+
+- Creating a named database pool with `synchronize: true` option
+- Using the broadcast channel API under the hood to notify other tabs of changes
+- Ensuring consistent state across all open tabs
+
+### Challenge 2: Data Persistence
+
+Ensuring data persistence across page refreshes was achieved by:
+
+- Using PgLite's IndexedDB storage backend
+- Creating proper table schemas with appropriate constraints
+- Handling database initialization on application startup
+
+### Challenge 3: Form Validation
+
+Implementing robust form validation required:
+
+- Using Zod schema validation for type-safe validation
+- Creating user-friendly error messages
+- Validating in real-time as users interact with the form
+
+## Git Commit History
+
 ```
+- Initial commit: Project setup with Vite, React, TypeScript and Tailwind CSS
+- Add PgLite dependency and database configuration
+- Create patient database schema and initialization
+- Implement patient registration form with validation
+- Add patient listing functionality
+- Create SQL query interface
+- Implement cross-tab synchronization
+- Add responsive design and UI improvements
+- Add documentation and deployment configuration
+- Fix edge cases and performance optimizations
+```
+
+## License
+
+MIT
