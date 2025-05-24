@@ -22,11 +22,25 @@ const App: React.FC = () => {
         console.error('Failed to initialize database:', error);
       }
     };
-    
+
     setup();
+
+    // Listen for updates from other tabs
+    const onDbUpdate = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      if (customEvent.detail?.operation) {
+        console.log('Database updated in another tab:', customEvent.detail);
+        loadPatients(); // Reload data
+      }
+    };
+
+    window.addEventListener('db-updated', onDbUpdate);
+
+    return () => {
+      window.removeEventListener('db-updated', onDbUpdate);
+    };
   }, []);
 
-  // Load all patients from the database
   const loadPatients = async () => {
     setIsLoading(true);
     try {
@@ -39,29 +53,23 @@ const App: React.FC = () => {
     }
   };
 
-  // Handle registration of a new patient
   const handleRegisterPatient = async (data: PatientFormData) => {
     try {
       await registerPatient(data);
-      // Reload patients to show the newly registered one
-      loadPatients();
+      loadPatients(); // Load for current tab
     } catch (error) {
       console.error('Failed to register patient:', error);
       throw error;
     }
   };
 
-  // Handle execution of custom SQL query
   const handleExecuteQuery = async (query: string) => {
     try {
       const result = await executeQuery(query);
-      
-      // If the query might have modified data, reload patients
       const mightModifyData = /insert|update|delete|alter|drop/i.test(query);
       if (mightModifyData) {
         loadPatients();
       }
-      
       return result;
     } catch (error) {
       console.error('Failed to execute query:', error);
@@ -76,7 +84,6 @@ const App: React.FC = () => {
   return (
     <Layout>
       <Toaster position="top-right" />
-      
       <div className="mb-6">
         <div className="sm:hidden">
           <select
@@ -88,7 +95,6 @@ const App: React.FC = () => {
             <option value="query">Query Database</option>
           </select>
         </div>
-        
         <div className="hidden sm:block">
           <div className="border-b border-gray-200">
             <nav className="-mb-px flex" aria-label="Tabs">
@@ -116,7 +122,7 @@ const App: React.FC = () => {
           </div>
         </div>
       </div>
-      
+
       {activeTab === 'register' ? (
         <>
           <PatientForm onSubmit={handleRegisterPatient} />
