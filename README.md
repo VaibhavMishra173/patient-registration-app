@@ -84,7 +84,7 @@ SELECT * FROM patients WHERE createdAt > date('now', '-7 days')
 
 ## Deployment
 
-This application is deployed at: [https://patient-registration-app.vercel.app](https://patient-registration-app.vercel.app)
+This application is deployed at: [https://patient-registration-app-woad.vercel.app/](https://patient-registration-app-woad.vercel.app/)
 
 ## Development Challenges
 
@@ -92,40 +92,27 @@ This application is deployed at: [https://patient-registration-app.vercel.app](h
 
 Implementing cross-tab synchronization required careful configuration of PgLite's synchronization options. The solution involved:
 
-- Creating a named database pool with `synchronize: true` option
 - Using the broadcast channel API under the hood to notify other tabs of changes
 - Ensuring consistent state across all open tabs
+- Creating a named database pool
 
 ### Challenge 2: Data Persistence
 
 Ensuring data persistence across page refreshes was achieved by:
 
-- Using PgLite's IndexedDB storage backend
-- Creating proper table schemas with appropriate constraints
 - Handling database initialization on application startup
+- Using PgLite's IndexedDB storage backend
+- Creating proper table schemas
 
 ### Challenge 3: Form Validation
 
 Implementing robust form validation required:
 
-- Using Zod schema validation for type-safe validation
 - Creating user-friendly error messages
-- Validating in real-time as users interact with the form
+- Using Zod schema validation for type-safe validation
 
 ## Git Commit History
-
-```
-- Initial commit: Project setup with Vite, React, TypeScript and Tailwind CSS
-- Add PgLite dependency and database configuration
-- Create patient database schema and initialization
-- Implement patient registration form with validation
-- Add patient listing functionality
-- Create SQL query interface
-- Implement cross-tab synchronization
-- Add responsive design and UI improvements
-- Add documentation and deployment configuration
-- Fix edge cases and performance optimizations
-```
+Check here - [https://github.com/VaibhavMishra173/patient-registration-app/commits/main/](https://github.com/VaibhavMishra173/patient-registration-app/commits/main/)
 
 ## License
 
